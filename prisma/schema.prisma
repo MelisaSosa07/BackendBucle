@@ -1,0 +1,107 @@
+// Schema de la base de datos de Bucle
+// Documentación: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Usuario ──────────────────────────────────────────────
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String   @unique
+  password  String   // se guarda encriptada con bcrypt
+  bucles    Int      @default(250) // bono de bienvenida al registrarse
+  avatar    String   @default("🙂") // emoji elegido como foto de perfil
+  creadoEn  DateTime @default(now())
+
+  // relaciones
+  voluntariadosCreados Voluntariado[]   @relation("CreadorVoluntariado")
+  anotaciones          Anotacion[]
+  canastas             Canasta[]
+  recompensasCreadas   Recompensa[]
+  canjes               Canje[]
+}
+
+// ─── Voluntariado ─────────────────────────────────────────
+model Voluntariado {
+  id          Int      @id @default(autoincrement())
+  emoji       String   @default("🌱")
+  titulo      String
+  descripcion String?
+  fecha       DateTime
+  hora        String
+  bucles      Int
+  direccion   String
+  lat         Float
+  lng         Float
+  fijo        Boolean  @default(false) // true = evento de ejemplo, no se puede borrar
+  creadoEn    DateTime @default(now())
+
+  creador    Usuario?    @relation("CreadorVoluntariado", fields: [creadorId], references: [id])
+  creadorId  Int?
+  anotaciones Anotacion[]
+}
+
+// ─── Anotación (un usuario anotado a un voluntariado) ─────
+model Anotacion {
+  id             Int      @id @default(autoincrement())
+  estado         String   @default("Anotado") // "Anotado" | "Completado"
+  creadoEn       DateTime @default(now())
+
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id])
+  usuarioId      Int
+  voluntariado   Voluntariado @relation(fields: [voluntariadoId], references: [id])
+  voluntariadoId Int
+
+  @@unique([usuarioId, voluntariadoId]) // un usuario no puede anotarse dos veces al mismo evento
+}
+
+// ─── Canasta de reciclaje ──────────────────────────────────
+model Canasta {
+  id          Int      @id @default(autoincrement())
+  foto        String?  // url o emoji
+  descripcion String
+  ubicacion   String
+  cantidad    String
+  bucles      Int      @default(20)
+  estado      String   @default("Disponible") // "Disponible" | "Retirada"
+  creadoEn    DateTime @default(now())
+
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+}
+
+// ─── Recompensa (publicada por un usuario, canjeable por bucles) ──
+model Recompensa {
+  id          Int      @id @default(autoincrement())
+  emoji       String   @default("🎁")
+  titulo      String
+  categoria   String?
+  descripcion String?
+  bucles      Int      // costo en bucles para canjearla
+  bgColor     String   @default("verde") // "verde" | "marron" | "mix"
+  ecoTag      Boolean  @default(false)
+  estado      String   @default("Disponible") // "Disponible" | "Canjeada"
+  creadoEn    DateTime @default(now())
+
+  creador   Usuario @relation(fields: [creadorId], references: [id])
+  creadorId Int
+  canjes    Canje[]
+}
+
+// ─── Canje (un usuario canjea una recompensa con sus bucles) ─────
+model Canje {
+  id           Int      @id @default(autoincrement())
+  buclesPagados Int
+  creadoEn     DateTime @default(now())
+
+  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
+  usuarioId    Int
+  recompensa   Recompensa @relation(fields: [recompensaId], references: [id])
+  recompensaId Int
+}
