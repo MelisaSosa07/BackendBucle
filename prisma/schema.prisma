@@ -9,12 +9,12 @@ datasource db {
   provider = "sqlite"
 }
 
-// ─── Usuario ──────────────────────────────────────────────
+//Usuario 
 model Usuario {
   id        Int      @id @default(autoincrement())
   nombre    String
   email     String   @unique
-  password  String   // se guarda encriptada con bcrypt
+  password  String   // se guarda encriptada 
   bucles    Int      @default(250) // bono de bienvenida al registrarse
   avatar    String   @default("🙂") // emoji elegido como foto de perfil
   creadoEn  DateTime @default(now())
@@ -27,7 +27,7 @@ model Usuario {
   canjes               Canje[]
 }
 
-// ─── Voluntariado ─────────────────────────────────────────
+//  Voluntariado 
 model Voluntariado {
   id          Int      @id @default(autoincrement())
   emoji       String   @default("🌱")
@@ -39,7 +39,7 @@ model Voluntariado {
   direccion   String
   lat         Float
   lng         Float
-  fijo        Boolean  @default(false) // true = evento de ejemplo, no se puede borrar
+  fijo        Boolean  @default(false) 
   creadoEn    DateTime @default(now())
 
   creador    Usuario?    @relation("CreadorVoluntariado", fields: [creadorId], references: [id])
@@ -47,7 +47,7 @@ model Voluntariado {
   anotaciones Anotacion[]
 }
 
-// ─── Anotación (un usuario anotado a un voluntariado) ─────
+//Anotación (un usuario anotado a un voluntariado)
 model Anotacion {
   id             Int      @id @default(autoincrement())
   estado         String   @default("Anotado") // "Anotado" | "Completado"
@@ -61,7 +61,7 @@ model Anotacion {
   @@unique([usuarioId, voluntariadoId]) // un usuario no puede anotarse dos veces al mismo evento
 }
 
-// ─── Canasta de reciclaje ──────────────────────────────────
+//  Canasta 
 model Canasta {
   id          Int      @id @default(autoincrement())
   foto        String?  // url o emoji
@@ -76,7 +76,7 @@ model Canasta {
   usuarioId Int
 }
 
-// ─── Recompensa (publicada por un usuario, canjeable por bucles) ──
+//  Recompensa publicada por un usuario, canjeable
 model Recompensa {
   id          Int      @id @default(autoincrement())
   emoji       String   @default("🎁")
@@ -94,7 +94,7 @@ model Recompensa {
   canjes    Canje[]
 }
 
-// ─── Canje (un usuario canjea una recompensa con sus bucles) ─────
+// Canje
 model Canje {
   id           Int      @id @default(autoincrement())
   buclesPagados Int

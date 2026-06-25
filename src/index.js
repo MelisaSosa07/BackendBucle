@@ -22,7 +22,6 @@ app.use("/api/canastas", canastasRoutes);
 app.use("/api/recompensas", recompensasRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 
-// ruta de prueba
 app.get("/", (req, res) => {
   res.send("API de Bucle funcionando 🌱");
 });

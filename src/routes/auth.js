@@ -31,7 +31,6 @@ router.post("/registro", async (req, res) => {
       expiresIn: "7d",
     });
 
-    // nunca devolvemos la contraseña, ni hasheada
     const { password: _, ...usuarioSinPassword } = usuario;
 
     res.status(201).json({ usuario: usuarioSinPassword, token });

@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST /api/voluntariados — crear uno nuevo (requiere estar logueado)
+// POST /api/voluntariados — crear uno nuevo
 router.post("/", verificarToken, async (req, res) => {
   try {
     const {
@@ -100,6 +100,38 @@ router.post("/:id/anotarse", verificarToken, async (req, res) => {
   }
 });
 
+// DELETE /api/voluntariados/:id/desanotarse
+router.delete("/:id/desanotarse", verificarToken, async (req, res) => {
+  try {
+    const voluntariadoId = Number(req.params.id);
+
+    const anotacion = await prisma.anotacion.findUnique({
+      where: {
+        usuarioId_voluntariadoId: { usuarioId: req.usuarioId, voluntariadoId },
+      },
+    });
+
+    if (!anotacion) {
+      return res.status(404).json({ error: "No estás anotado a este evento" });
+    }
+
+    if (anotacion.estado === "Completado") {
+      return res
+        .status(409)
+        .json({
+          error: "Ya completaste este voluntariado, no podés desanotarte",
+        });
+    }
+
+    await prisma.anotacion.delete({ where: { id: anotacion.id } });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al desanotarse" });
+  }
+});
+
 // DELETE /api/voluntariados/:id — borrar
 router.delete("/:id", verificarToken, async (req, res) => {
   try {
@@ -117,7 +149,6 @@ router.delete("/:id", verificarToken, async (req, res) => {
         .json({ error: "Este evento no se puede eliminar" });
     }
 
-    // borramos primero las anotaciones relacionadas, y después el evento
     await prisma.anotacion.deleteMany({ where: { voluntariadoId: id } });
     await prisma.voluntariado.delete({ where: { id } });
 
@@ -129,8 +160,8 @@ router.delete("/:id", verificarToken, async (req, res) => {
 });
 
 // PATCH /api/voluntariados/:id/completar/:usuarioId
-// Marca la anotación de un usuario como "Completado" y le suma los bucles.
-// Pensado para que lo use un organizador después del evento.
+// confir la anotación de un usuario como "Completado" y le suma los bucles.
+//  para que lo use un organizador después del evento.
 router.patch("/:id/completar/:usuarioId", verificarToken, async (req, res) => {
   try {
     const voluntariadoId = Number(req.params.id);
@@ -155,7 +186,7 @@ router.patch("/:id/completar/:usuarioId", verificarToken, async (req, res) => {
       where: { id: voluntariadoId },
     });
 
-    // marcamos completado y sumamos bucles en una sola transacción
+    // marcamos completado y agregam bucles
     const [anotacionActualizada] = await prisma.$transaction([
       prisma.anotacion.update({
         where: { id: anotacion.id },
@@ -174,7 +205,7 @@ router.patch("/:id/completar/:usuarioId", verificarToken, async (req, res) => {
   }
 });
 
-// GET /api/voluntariados/mis-anotaciones — historial del usuario logueado
+// GET /api/voluntariados/mis-anotaciones — historial
 router.get("/mis-anotaciones", verificarToken, async (req, res) => {
   try {
     const anotaciones = await prisma.anotacion.findMany({

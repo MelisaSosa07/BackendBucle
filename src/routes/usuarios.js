@@ -4,7 +4,7 @@ import { verificarToken } from "../middleware/auth.js";
 
 const router = Router();
 
-// GET /api/usuarios/me — datos actuales del usuario logueado (incluye bucles al día)
+// GET /api/usuarios/me — datos actuales del usuario
 router.get("/me", verificarToken, async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({

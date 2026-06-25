@@ -4,8 +4,8 @@ import { verificarToken } from "../middleware/auth.js";
 
 const router = Router();
 
-// GET /api/canastas?estado=Disponible — usado en Comunidad.jsx
-// GET /api/canastas?usuarioId=5 — usado en MiPerfil.jsx (mis canastas)
+// GET /api/canastas?estado=Disponible — en Comunidad.jsx
+// GET /api/canastas?usuarioId=5 — en MiPerfil.jsx
 router.get("/", async (req, res) => {
   try {
     const { estado, usuarioId } = req.query;
@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
     const canastas = await prisma.canasta.findMany({
       where: filtros,
       orderBy: { creadoEn: "desc" },
-      include: { usuario: { select: { nombre: true } } },
+      include: { usuario: { select: { nombre: true, email: true } } },
     });
 
     res.json(canastas);
@@ -70,7 +70,7 @@ router.patch("/:id/retirar", verificarToken, async (req, res) => {
       data: { estado: "Retirada" },
     });
 
-    // sumamos los bucles al usuario que la retiró
+    // sumamos los bucles al usuario
     await prisma.usuario.update({
       where: { id: req.usuarioId },
       data: { bucles: { increment: canasta.bucles } },

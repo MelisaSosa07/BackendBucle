@@ -5,7 +5,7 @@ import { verificarToken } from "../middleware/auth.js";
 const router = Router();
 
 // GET /api/recompensas en Tienda.jsx
-// GET /api/recompensas?creadorId=5 — las que publicó un usuario
+// GET /api/recompensas?creadorId=5 — las que publicó el usuario
 router.get("/", async (req, res) => {
   try {
     const { creadorId, estado } = req.query;
@@ -83,8 +83,8 @@ router.post("/:id/canjear", verificarToken, async (req, res) => {
         .json({ error: "No tenés suficientes bucles para este canje" });
     }
 
-    // restamos bucles al usuario, marcamos la recompensa canjeada y guardamos el canje,
-    // todo junto para que si algo falla no quede a medias
+    // restamos bucles al usuario, marcamos la recompensa canjeada y guardamos el canje
+
     const [, recompensaActualizada, canje] = await prisma.$transaction([
       prisma.usuario.update({
         where: { id: req.usuarioId },
@@ -110,7 +110,7 @@ router.post("/:id/canjear", verificarToken, async (req, res) => {
   }
 });
 
-// GET /api/recompensas/mis-canjes — historial de canjes del usuario logueado
+// GET /api/recompensas/mis-canjes — historial de canjes del usuario
 router.get("/mis-canjes", verificarToken, async (req, res) => {
   try {
     const canjes = await prisma.canje.findMany({
