@@ -116,11 +116,9 @@ router.delete("/:id/desanotarse", verificarToken, async (req, res) => {
     }
 
     if (anotacion.estado === "Completado") {
-      return res
-        .status(409)
-        .json({
-          error: "Ya completaste este voluntariado, no podés desanotarte",
-        });
+      return res.status(409).json({
+        error: "Ya completaste este voluntariado, no podés desanotarte",
+      });
     }
 
     await prisma.anotacion.delete({ where: { id: anotacion.id } });
@@ -160,8 +158,7 @@ router.delete("/:id", verificarToken, async (req, res) => {
 });
 
 // PATCH /api/voluntariados/:id/completar/:usuarioId
-// confir la anotación de un usuario como "Completado" y le suma los bucles.
-//  para que lo use un organizador después del evento.
+// confir la anotación de un usuario como "Completado" y le suma los bucles es para que lo use un organizador después del evento.
 router.patch("/:id/completar/:usuarioId", verificarToken, async (req, res) => {
   try {
     const voluntariadoId = Number(req.params.id);

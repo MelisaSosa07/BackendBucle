@@ -9,12 +9,12 @@ datasource db {
   provider = "sqlite"
 }
 
-//Usuario 
+// Usuario
 model Usuario {
   id        Int      @id @default(autoincrement())
   nombre    String
   email     String   @unique
-  password  String   // se guarda encriptada 
+  password  String   // se guarda encriptada con bcrypt
   bucles    Int      @default(250) // bono de bienvenida al registrarse
   avatar    String   @default("🙂") // emoji elegido como foto de perfil
   creadoEn  DateTime @default(now())
@@ -27,7 +27,7 @@ model Usuario {
   canjes               Canje[]
 }
 
-//  Voluntariado 
+// Voluntariado 
 model Voluntariado {
   id          Int      @id @default(autoincrement())
   emoji       String   @default("🌱")
@@ -39,7 +39,7 @@ model Voluntariado {
   direccion   String
   lat         Float
   lng         Float
-  fijo        Boolean  @default(false) 
+  fijo        Boolean  @default(false) // true = evento de ejemplo, no se puede borrar
   creadoEn    DateTime @default(now())
 
   creador    Usuario?    @relation("CreadorVoluntariado", fields: [creadorId], references: [id])
@@ -47,7 +47,7 @@ model Voluntariado {
   anotaciones Anotacion[]
 }
 
-//Anotación (un usuario anotado a un voluntariado)
+// Anotación 
 model Anotacion {
   id             Int      @id @default(autoincrement())
   estado         String   @default("Anotado") // "Anotado" | "Completado"
@@ -61,22 +61,23 @@ model Anotacion {
   @@unique([usuarioId, voluntariadoId]) // un usuario no puede anotarse dos veces al mismo evento
 }
 
-//  Canasta 
+//Canasta de reciclaje 
 model Canasta {
-  id          Int      @id @default(autoincrement())
-  foto        String?  // url o emoji
-  descripcion String
-  ubicacion   String
-  cantidad    String
-  bucles      Int      @default(20)
-  estado      String   @default("Disponible") // "Disponible" | "Retirada"
-  creadoEn    DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  foto         String?  // url o emoji
+  descripcion  String
+  ubicacion    String
+  cantidad     String
+  bucles       Int      @default(20)
+  estado       String   @default("Disponible") // "Disponible" | "Retirada"
+  codigoRetiro String   // código que el que retira debe mostrar al dueño para confirmar la entrega
+  creadoEn     DateTime @default(now())
 
   usuario   Usuario @relation(fields: [usuarioId], references: [id])
   usuarioId Int
 }
 
-//  Recompensa publicada por un usuario, canjeable
+//publicada por un usuario, canjeable por bucles
 model Recompensa {
   id          Int      @id @default(autoincrement())
   emoji       String   @default("🎁")
@@ -86,7 +87,8 @@ model Recompensa {
   bucles      Int      // costo en bucles para canjearla
   bgColor     String   @default("verde") // "verde" | "marron" | "mix"
   ecoTag      Boolean  @default(false)
-  estado      String   @default("Disponible") // "Disponible" | "Canjeada"
+  estado      String   @default("Disponible") // "Disponible" | "Canjeada" (solo aplica si fijo=false)
+  fijo        Boolean  @default(false) // true = recompensa de ejemplo, reutilizable por cualquier usuario
   creadoEn    DateTime @default(now())
 
   creador   Usuario @relation(fields: [creadorId], references: [id])
@@ -94,7 +96,7 @@ model Recompensa {
   canjes    Canje[]
 }
 
-// Canje
+//Canje 
 model Canje {
   id           Int      @id @default(autoincrement())
   buclesPagados Int

@@ -12,7 +12,6 @@ const adapter = new PrismaBetterSqlite3({
   url: `file:${dbPath}`,
 });
 
-// instancia única de Prisma para toda la app
 const prisma = new PrismaClient({ adapter });
 
 export default prisma;
